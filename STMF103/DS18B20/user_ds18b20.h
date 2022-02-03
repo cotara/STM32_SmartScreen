@@ -1,19 +1,22 @@
 #ifndef __DS18B20_H__
 #define __DS18B20_H__
 
+
 #define DELAY_RESET           500
-#define DELAY_WRITE_0         60
-#define DELAY_WRITE_0_PAUSE   10
-#define DELAY_WRITE_1         10
-#define DELAY_WRITE_1_PAUSE   60
-#define DELAY_READ_SLOT       10
-#define DELAY_BUS_RELAX       10
-#define DELAY_READ_PAUSE      50
-#define DELAY_T_CONVERT       760000
+#define DELAY_WRITE_0         65
+#define DELAY_WRITE_0_PAUSE   5
+#define DELAY_WRITE_1         5
+#define DELAY_WRITE_1_PAUSE   65
+#define DELAY_READ_SLOT       2
+#define DELAY_BUS_RELAX       13
+#define DELAY_READ_PAUSE      45
+#define DELAY_T_CONVERT       800000
+#define DELAY_RELAXATION      5
+
 #define DELAY_RELAXATION      5
 
 
-//Преобразование для 12 бит = 750 мс
+//РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РґР»СЏ 12 Р±РёС‚ = 750 РјСЃ
 
 #include "stm32f10x.h"
 //#include "utils.h"
@@ -34,8 +37,10 @@ typedef enum {
     TL_REGISTER      = 0x46,
 } COMMANDS_t;
 
-void ds18b20_init(const DS18B20_RESOLUTION_t resolution);
-void ds18b20_set_resolution(const DS18B20_RESOLUTION_t resolution);
+uint8_t ds18b20_init(const DS18B20_RESOLUTION_t resolution);
+uint8_t ds18b20_set_resolution(const DS18B20_RESOLUTION_t resolution);
 uint16_t ds18b20_get_temperature(void);
+void pinSetOutput();
+void pinSetInput();
 
 #endif /* __DS18B20_H__ */

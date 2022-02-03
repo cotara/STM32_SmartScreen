@@ -18,8 +18,7 @@ volatile unsigned long  tx_wr_index=0,
 
 void usart_init(void)
 {
-  NVIC_InitTypeDef NVIC_InitStructure;
-  GPIO_InitTypeDef GPIO_InitStructure;
+   GPIO_InitTypeDef GPIO_InitStructure;
   /* Enable USART1 and GPIOA clock */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_GPIOA, ENABLE);
         RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
@@ -29,11 +28,12 @@ void usart_init(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	/* Configure USART1 Rx (PA.10) as input floating */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+        
+        GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+        
 
 	/* Configure the USART1 */
 	USART_InitTypeDef USART_InitStructure;
@@ -55,19 +55,15 @@ void usart_init(void)
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
         
         /* Enable the USARTx Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+	
+        NVIC_SetPriority (USART1_IRQn, 0);
+        NVIC_EnableIRQ (USART1_IRQn);
 }
 void clear_RXBuffer(void) {
     for (RXi=0; RXi<RX_BUF_SIZE; RXi++)
         RX_BUF[RXi] = '\0';
     RXi = 0;
 }
-
-
 
 void setRxi(uint16_t i){
   RXi = i;
@@ -90,17 +86,17 @@ uint8_t fromBuf( uint16_t i){
 }
 
 void USART1_put_char(uint8_t c) {
-  while (tx_counter == TX_BUFFER_SIZE);                                         //åñëè áóôåð ïåðåïîëíåí, æäåì
-  USART_ITConfig(USART1, USART_IT_TC, DISABLE);                                //çàïðåùàåì ïðåðûâàíèå, ÷òîáû îíî íå ìåøàëî ìåíÿòü ïåðåìåííóþ
-  if (tx_counter || (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET))     //åñëè â áóôåðå óæå ÷òî-òî åñòü èëè åñëè â äàííûé ìîìåíò ÷òî-òî óæå ïåðåäàåòñÿ
+  while (tx_counter == TX_BUFFER_SIZE);                                         //ÐµÑÐ»Ð¸ Ð±ÑƒÑ„ÐµÑ€ Ð¿ÐµÑ€ÐµÐ¿Ð¾Ð»Ð½ÐµÐ½, Ð¶Ð´ÐµÐ¼
+  USART_ITConfig(USART1, USART_IT_TC, DISABLE);                                 //Ð·Ð°Ð¿Ñ€ÐµÑ‰Ð°ÐµÐ¼ Ð¿Ñ€ÐµÑ€Ñ‹Ð²Ð°Ð½Ð¸Ðµ, Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð¾Ð½Ð¾ Ð½Ðµ Ð¼ÐµÑˆÐ°Ð»Ð¾ Ð¼ÐµÐ½ÑÑ‚ÑŒ Ð¿ÐµÑ€ÐµÐ¼ÐµÐ½Ð½ÑƒÑŽ
+  if (tx_counter || (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET))     //ÐµÑÐ»Ð¸ Ð² Ð±ÑƒÑ„ÐµÑ€Ðµ ÑƒÐ¶Ðµ Ñ‡Ñ‚Ð¾-Ñ‚Ð¾ ÐµÑÑ‚ÑŒ Ð¸Ð»Ð¸ ÐµÑÐ»Ð¸ Ð² Ð´Ð°Ð½Ð½Ñ‹Ð¹ Ð¼Ð¾Ð¼ÐµÐ½Ñ‚ Ñ‡Ñ‚Ð¾-Ñ‚Ð¾ ÑƒÐ¶Ðµ Ð¿ÐµÑ€ÐµÐ´Ð°ÐµÑ‚ÑÑ
   {
-    tx_buffer[tx_wr_index++] = c;                                               //òî êëàäåì äàííûå â áóôåð
-    if (tx_wr_index == TX_BUFFER_SIZE) tx_wr_index=0;                           //èäåì ïî êðóãó
-    ++tx_counter;                                                               //óâåëè÷èâàåì ñ÷åò÷èê êîëè÷åñòâà äàííûõ â áóôåðå
-    USART_ITConfig(USART1, USART_IT_TC, ENABLE);                               //ðàçðåøàåì ïðåðûâàíèå
+    tx_buffer[tx_wr_index++] = c;                                               //Ñ‚Ð¾ ÐºÐ»Ð°Ð´ÐµÐ¼ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð² Ð±ÑƒÑ„ÐµÑ€
+    if (tx_wr_index == TX_BUFFER_SIZE) tx_wr_index=0;                           //Ð¸Ð´ÐµÐ¼ Ð¿Ð¾ ÐºÑ€ÑƒÐ³Ñƒ
+    ++tx_counter;                                                               //ÑƒÐ²ÐµÐ»Ð¸Ñ‡Ð¸Ð²Ð°ÐµÐ¼ ÑÑ‡ÐµÑ‚Ñ‡Ð¸Ðº ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð° Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð² Ð±ÑƒÑ„ÐµÑ€Ðµ
+    USART_ITConfig(USART1, USART_IT_TC, ENABLE);                                //ÐµÑÐ»Ð¸ UART ÑÐ²Ð¾Ð±Ð¾Ð´ÐµÐ½
   }
-  else                                                                          //åñëè UART ñâîáîäåí
-    USART_SendData(USART1, c);                                                  //ïåðåäàåì äàííûå áåç ïðåðûâàíèÿ
+  else                                                                          //Ð¿ÐµÑ€ÐµÐ´Ð°ÐµÐ¼ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð±ÐµÐ· Ð¿Ñ€ÐµÑ€Ñ‹Ð²Ð°Ð½Ð¸Ñ
+    USART_SendData(USART1, c);                                                  //Ñ€Ð°Ð·Ñ€ÐµÑˆÐ°ÐµÐ¼ Ð¿Ñ€ÐµÑ€Ñ‹Ð²Ð°Ð½Ð¸Ðµ
 }
 
 void USART1_put_string(unsigned char *string, uint32_t l) {

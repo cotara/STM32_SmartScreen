@@ -66,7 +66,7 @@
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state>8.30.2.18207</state>
+                    <state>8.30.1.17146</state>
                 </option>
                 <option>
                     <name>GeneralEnableMisra</name>
@@ -355,6 +355,7 @@
                     <state>$PROJ_DIR$\CMSIS</state>
                     <state>$PROJ_DIR$</state>
                     <state>$PROJ_DIR$\DS18B20</state>
+                    <state>$PROJ_DIR$\EEPROM</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -769,7 +770,7 @@
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>C:\Users\User\Documents\Projects\Nextion\Olimex H103\Nextion\CMSIS\stm32f103x6_flash.icf</state>
+                    <state>C:\STM\STM32_SmartScreen\STMF103\Config\STM32F10x_FLASH.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>
@@ -2067,6 +2068,12 @@
         </file>
     </group>
     <group>
+        <name>EEPROM</name>
+        <file>
+            <name>$PROJ_DIR$\EEPROM\i2c_ee.c</name>
+        </file>
+    </group>
+    <group>
         <name>STM32Std</name>
         <file>
             <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\misc.c</name>
@@ -2075,10 +2082,10 @@
             <name>$PROJ_DIR$\startup_stm32f10x_md.s</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_dma.c</name>
+            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_gpio.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_gpio.c</name>
+            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_i2c.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_rcc.c</name>
@@ -2098,6 +2105,9 @@
     </group>
     <group>
         <name>User</name>
+        <file>
+            <name>$PROJ_DIR$\LED_user.c</name>
+        </file>
         <file>
             <name>$PROJ_DIR$\myNextion.c</name>
         </file>

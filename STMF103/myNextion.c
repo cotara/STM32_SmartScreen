@@ -5,6 +5,7 @@
 #include "stm32f10x_gpio.h"
 #include <stdio.h>
 #include <string.h>
+#include "LED_user.h"
 
 uint8_t RX_FLAG_END_LINE = 0;
 uint8_t status[21]="t3.txt=";
@@ -12,57 +13,43 @@ uint8_t command[11]="sendme";
 uint32_t st=0;
 uint8_t endMes[3]={0xFF,0xFF,0xFF};
 static uint8_t StrBuff[64]; 
+uint8_t nowPage=0;
+uint8_t reqBigBuf=0;
 
 void USART_IRQProcessFunc(uint8_t RXc){
     toBuf(RXc);
-    TIM_Cmd(TIM3, DISABLE);
-    if (RXc == 0xFF)                                                            //Если пришел признак окончания команды (их должно быть 3)
+    TIM_Cmd(TIM4, DISABLE);
+    TIM4->CNT = 0;
+    if (RXc == 0xFF)                                                            //Р•СЃР»Рё РїСЂРёС€РµР» РїСЂРёР·РЅР°Рє РѕРєРѕРЅС‡Р°РЅРёСЏ РєРѕРјР°РЅРґС‹ (РёС… РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ 3)
        RX_FLAG_END_LINE++;
-    if(RX_FLAG_END_LINE!=3)                                                     //Если команда пришла еще не полностью, запускаем таймер сброса
-         TIM_Cmd(TIM3, ENABLE);   
+    if(RX_FLAG_END_LINE!=3)                                                     //Р•СЃР»Рё РєРѕРјР°РЅРґР° РїСЂРёС€Р»Р° РµС‰Рµ РЅРµ РїРѕР»РЅРѕСЃС‚СЊСЋ, Р·Р°РїСѓСЃРєР°РµРј С‚Р°Р№РјРµСЂ СЃР±СЂРѕСЃР°
+         TIM_Cmd(TIM4, ENABLE);   
 }
 
 void nextionEvent(void){
-      //fromBuf(0) - номер страницы
-      //fromBuf(1) - номер кнопки (элемента). 0 - переход на страницу
-      //fromBuf(3) - значение 
+      //fromBuf(0) - РЅРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹
+      //fromBuf(1) - РЅРѕРјРµСЂ РєРЅРѕРїРєРё (СЌР»РµРјРµРЅС‚Р°). 0 - РїРµСЂРµС…РѕРґ РЅР° СЃС‚СЂР°РЅРёС†Сѓ
+      //fromBuf(3) - Р·РЅР°С‡РµРЅРёРµ 
       
       RX_FLAG_END_LINE=0;
       
-      if(fromBuf(0) == 0x02 && fromBuf(1) == 0x01){                             //СТАРТ Массаж 1
-        GPIO_SetBits(GPIOC,GPIO_Pin_12);
-        TIM4->CCR1=fromBuf(3);
+      if(fromBuf(0) == 0x00 && fromBuf(1) == 0x08){                             //РЎРўРђР Рў РњР°СЃСЃР°Р¶ 1
+        if (fromBuf(3) == 1){
+          LEDOn();
+        }
+        else
+          LEDOff();
       }
-      else if(fromBuf(0) == 0x02 && fromBuf(1) == 0x02){                        //ПАУЗА Массаж 1
-        GPIO_ResetBits(GPIOC,GPIO_Pin_12);
-        TIM4->CCR1=0;
-      }
-      else if(fromBuf(0) == 0x02 && fromBuf(1) == 0x03){                        //СТОП Массаж 1
-        GPIO_ResetBits(GPIOC,GPIO_Pin_12);
-        TIM4->CCR1=0;
-      }
-      else if(fromBuf(0) == 0x03 && fromBuf(1) == 0x01){                        //СТАРТ Массаж 2
-        GPIO_SetBits(GPIOC,GPIO_Pin_13);
-        TIM4->CCR2=fromBuf(3);
-      }
-      else if(fromBuf(0) == 0x03 && fromBuf(1) == 0x02){                        //ПАУЗА Массаж 2
-        GPIO_ResetBits(GPIOC,GPIO_Pin_13);
-        TIM4->CCR2=0;
-      }
-      else if(fromBuf(0) == 0x03 && fromBuf(1) == 0x03){                        //СТОП Массаж 2
-        GPIO_ResetBits(GPIOC,GPIO_Pin_13);
-        TIM4->CCR2=0;
-      }
-      else if(fromBuf(0) == 0x01 && fromBuf(1) == 0x00 &&  fromBuf(3) == 0x01){ //Запрос комплектации
-          st = GPIO_ReadInputDataBit (GPIOC, GPIO_Pin_8)*2 + GPIO_ReadInputDataBit (GPIOC, GPIO_Pin_6);
-          Nextion_SetValue_Number("mode.val", st);
+      else if(fromBuf(1) == 0x00){
+        nowPage = fromBuf(0);
+        if (nowPage == 2) reqBigBuf=1;
       }
      clear_RXBuffer();
 }
 
 void Nextion_SetValue_Number(char *ValueName, uint32_t Value)
 {
-  sprintf((char *)StrBuff, "%s=%d", ValueName, Value);
+  sprintf((char *)StrBuff, "%s%d", ValueName, Value);
   uint16_t Len = strlen((char *)StrBuff);
   
   USART1_put_string(StrBuff, Len);
@@ -85,4 +72,15 @@ void resetFLAG_END_LINE(void){
 }
 uint8_t getFLAG_END_LINE(void){
   return RX_FLAG_END_LINE;
+}
+
+uint8_t getReqBigBuf(void){
+  return reqBigBuf;
+}
+void resetReqBigBuf(void){
+   reqBigBuf=0;
+}
+
+uint8_t getNowPage(void){
+  return nowPage;
 }

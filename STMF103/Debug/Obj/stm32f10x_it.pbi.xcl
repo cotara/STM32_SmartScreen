@@ -15,6 +15,8 @@ C:\STM\STM32_SmartScreen\STMF103
 -I
 C:\STM\STM32_SmartScreen\STMF103\DS18B20
 -I
+C:\STM\STM32_SmartScreen\STMF103\EEPROM
+-I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\Core\Include
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\DSP\Include
@@ -32,6 +34,8 @@ C:\STM\STM32_SmartScreen\STMF103\CMSIS
 C:\STM\STM32_SmartScreen\STMF103
 -I
 C:\STM\STM32_SmartScreen\STMF103\DS18B20
+-I
+C:\STM\STM32_SmartScreen\STMF103\EEPROM
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\Core\Include
 -I

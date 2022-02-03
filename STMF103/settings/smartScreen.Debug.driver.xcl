@@ -6,13 +6,23 @@
 
 "-p" 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CONFIG\debugger\ST\STM32F103T6.ddf" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\arm\CONFIG\debugger\ST\STM32F103T6.ddf" 
 
 "--semihosting" 
 
 "--device=STM32F103T6" 
 
-"--multicore_nr_of_cores=1" 
+"--drv_interface=SWD" 
+
+"--stlink_reset_strategy=0,0" 
+
+"--drv_swo_clock_setup=72000000,0,2000000" 
+
+"--drv_catch_exceptions=0x000" 
+
+"--drv_debug_ap=0" 
+
+"--stlink_probe=stlinkv2" 
 
 
 

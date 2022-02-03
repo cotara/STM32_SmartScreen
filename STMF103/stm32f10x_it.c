@@ -2,12 +2,13 @@
 #include "stm32f10x_usart.h"
 #include "user_TIMER.h"
 #include "user_USART.h"
+#include "LED_user.h"
 #include "myNextion.h"
 #define TX_BUFFER_SIZE 100
 
 extern volatile uint8_t   tx_buffer[TX_BUFFER_SIZE];
 extern volatile unsigned long  tx_wr_index,tx_rd_index,tx_counter;
-
+uint32_t mcs=0;
 
 void HardFault_Handler(void){
   while (1)
@@ -24,9 +25,9 @@ void BusFault_Handler(void){
   {}
 }
 
-
 void SysTick_Handler(void){
-  TimingDelay_Decrement();
+  TimingDelay_1ms_Decrement();
+     
 }
 
 /******************************************************************************/
@@ -35,24 +36,41 @@ void SysTick_Handler(void){
 void TIM2_IRQHandler(void){
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
     TimingDelay_1mcs_Decrement();
-    //setRxi(0);
+    //mcs++;
+    //LEDToggle();
+}
+ 
+void TIM4_IRQHandler(void){
+
+    TIM_ClearFlag(TIM4, TIM_IT_Update);
+    setRxi(0);                      //1 –º—Å –Ω–µ –ø—Ä–∏—Ö–æ–¥–∏–ª–æ –Ω–æ–≤–æ–≥–æ –±–∞–π—Ç–∞. –ó–Ω–∞—á–∏—Ç –±—ã–ª –∑–∞—Ç—ã–∫
+    resetFLAG_END_LINE();
+    TIM_Cmd(TIM4, DISABLE);         //–ü–µ—Ä–µ—Å—Ç–∞–ª–∏ —Å—á–∏—Ç–∞—Ç—å. –ñ–¥–µ–º —Å–ª–µ–¥—É—é—â–µ–π –ø–æ—Å—ã–ª–∫–∏.
+    TIM4->CNT = 0;
 }
 
-
 void USART1_IRQHandler(void){
-  if ((USART1->SR & USART_FLAG_RXNE))
-   USART_IRQProcessFunc(USART_ReceiveData(USART1));    
-  
-  if(USART_GetITStatus(USART1, USART_IT_TC) == SET) {                          //ÔÂ˚‚‡ÌËÂ ÔÓ ÔÂÂ‰‡˜Â
-      if (tx_counter) {                                                           //ÂÒÎË ÂÒÚ¸ ˜ÚÓ ÔÂÂ‰‡Ú¸
-        --tx_counter;                                                             // ÛÏÂÌ¸¯‡ÂÏ ÍÓÎË˜ÂÒÚ‚Ó ÌÂ ÔÂÂ‰‡ÌÌ˚ı ‰‡ÌÌ˚ı
-        USART_SendData(USART1,tx_buffer[tx_rd_index++]);                          //ÔÂÂ‰‡ÂÏ ‰‡ÌÌ˚Â ËÌÍÂÏÂÌÚËÛˇ ı‚ÓÒÚ ·ÛÙÂ‡
-        if (tx_rd_index == TX_BUFFER_SIZE) tx_rd_index=0;                         //Ë‰ÂÏ ÔÓ ÍÛ„Û
-      }
-      else {
-        USART_ITConfig(USART1, USART_IT_TC, DISABLE);                            //ÂÒÎË ÌÂ˜Â„Ó ÔÂÂ‰‡Ú¸, Á‡ÔÂ˘‡ÂÏ ÔÂ˚‚‡ÌËÂ ÔÓ ÔÂÂ‰‡˜Â
-      }
-   } 
+    if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+        USART_ClearITPendingBit(USART1, USART_IT_RXNE); //–æ—á–∏—Å—Ç–∫–∞ –ø—Ä–∏–∑–Ω–∞–∫–∞ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏—è
+        if ((USART1->SR & (USART_FLAG_FE | USART_FLAG_PE)) == 0) { //–Ω–µ—Ç –æ—à–∏–±–æ–∫
+            USART_IRQProcessFunc(USART_ReceiveData(USART1) & 0xFF);
+        }                                 
+        else  USART_ReceiveData(USART1);
+    }
+           
+    
+    if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) { //–ø—Ä–µ—Ä—ã–≤–∞–Ω–∏–µ –ø–æ –ø–µ—Ä–µ–¥–∞—á–µ
+        USART_ClearITPendingBit(USART1, USART_IT_TC); //–æ—á–∏—â–∞–µ–º –ø—Ä–∏–∑–Ω–∞–∫ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏—è
+        if (tx_counter) {                               //–µ—Å–ª–∏ –µ—Å—Ç—å —á—Ç–æ –ø–µ—Ä–µ–¥–∞—Ç—å
+            --tx_counter;           // —É–º–µ–Ω—å—à–∞–µ–º –∫–æ–ª–∏—á–µ—Å—Ç–≤–æ –Ω–µ –ø–µ—Ä–µ–¥–∞–Ω–Ω—ã—Ö –¥–∞–Ω–Ω—ã—Ö
+            USART_SendData(USART1, tx_buffer[tx_rd_index++]); //–ø–µ—Ä–µ–¥–∞–µ–º –¥–∞–Ω–Ω—ã–µ –∏–Ω–∫—Ä–µ–º–µ–Ω—Ç–∏—Ä—É—è —Ö–≤–æ—Å—Ç –±—É—Ñ–µ—Ä–∞
+            if (tx_rd_index == TX_BUFFER_SIZE)
+                tx_rd_index = 0;                         //–∏–¥–µ–º –ø–æ –∫—Ä—É–≥—É
+        }
+        else
+            USART_ITConfig(USART1, USART_IT_TC, DISABLE); //–µ—Å–ª–∏ –Ω–µ—á–µ–≥–æ –ø–µ—Ä–µ–¥–∞—Ç—å, –∑–∞–ø—Ä–µ—â–∞–µ–º –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏–µ –ø–æ –ø–µ—Ä–µ–¥–∞—á–µ
+    }
+
 }
 
 /*******************************************************************************/

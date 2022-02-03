@@ -1,5 +1,11 @@
 #include "user_ds18b20.h"
+#include "stm32f10x_rcc.h"
+#include "stm32f10x_gpio.h"
 #include "user_TIMER.h"
+
+#define PIN_LOW GPIO_ResetBits(GPIOA, GPIO_Pin_7);
+#define PIN_HIGH GPIO_SetBits(GPIOA, GPIO_Pin_7);
+#define READ_DS18B20_BIT GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_7);
 
 static uint32_t convert_delay = DELAY_T_CONVERT;
 
@@ -8,26 +14,34 @@ static void write_byte(const uint8_t byte);
 static uint8_t read_bit(void);
 static uint8_t get_devider(const DS18B20_RESOLUTION_t resolution);
 static uint16_t read_temperature(void);
-static void reset(void);
+static uint8_t reset(void);
 
-void ds18b20_init(const DS18B20_RESOLUTION_t resolution) {
-    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+uint8_t ds18b20_init(const DS18B20_RESOLUTION_t resolution) {
 
-    // 50MHz output open-drain
-    GPIOA->CRL |= GPIO_CRL_MODE1;
-    GPIOA->CRL |= GPIO_CRL_CNF1_0;
-    GPIOA->CRL &= ~GPIO_CRL_CNF1_1;
+  GPIO_InitTypeDef GPIO_InitStructure;
+  
+    
+   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+   
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    ds18b20_set_resolution(resolution);
+    return ds18b20_set_resolution(resolution);
 }
-void ds18b20_set_resolution(const DS18B20_RESOLUTION_t resolution) {
-    reset();                      // send reset
-    write_byte(SKIP_ROM);         // work only with one device (пропуск команды определения адреса)
-    write_byte(WRITE_SCRATCHPAD); // set resolution
-    write_byte(TH_REGISTER);      //
-    write_byte(TL_REGISTER);      //
-    write_byte(resolution);       //
-    convert_delay = DELAY_T_CONVERT / get_devider(resolution); // calc conversation delay
+uint8_t ds18b20_set_resolution(const DS18B20_RESOLUTION_t resolution) {
+    if(reset())                   // send reset
+        return 1;
+    else{
+      write_byte(SKIP_ROM);         // work only with one device 
+      write_byte(WRITE_SCRATCHPAD); // set resolution
+      write_byte(TH_REGISTER);      //
+      write_byte(TL_REGISTER);      //
+      write_byte(resolution);       //
+      convert_delay = DELAY_T_CONVERT / get_devider(resolution); // calc conversation delay
+    }
+    return 0;
 }
 
 uint8_t get_devider(const DS18B20_RESOLUTION_t resolution) {
@@ -49,11 +63,17 @@ uint8_t get_devider(const DS18B20_RESOLUTION_t resolution) {
     }
     return devider;
 }
-void reset(void) {
-    GPIOA->ODR &= ~GPIO_ODR_ODR1;
+uint8_t  reset(void) {
+    uint8_t bit=1;
+    PIN_LOW
     delay_1_mcs(DELAY_RESET);
-    GPIOA->ODR |= GPIO_ODR_ODR1;
-    delay_1_mcs(DELAY_RESET);
+    PIN_HIGH
+    delay_1_mcs(DELAY_WRITE_0);
+    
+    bit = READ_DS18B20_BIT
+    delay_1_mcs(DELAY_RESET);  
+
+  return (bit ? 1 : 0);//РІРµСЂРЅС‘Рј СЂРµР·СѓР»СЊС‚Р°С‚
 }
 
 uint16_t ds18b20_get_temperature() {
@@ -70,9 +90,9 @@ uint16_t ds18b20_get_temperature() {
 }
 
 void write_bit(uint8_t bit) {
-    GPIOA->ODR &= ~GPIO_ODR_ODR1;
+    PIN_LOW
     delay_1_mcs(bit ? DELAY_WRITE_1 : DELAY_WRITE_0);
-    GPIOA->ODR |= GPIO_ODR_ODR1;
+    PIN_HIGH
     delay_1_mcs(bit ? DELAY_WRITE_1_PAUSE : DELAY_WRITE_0_PAUSE);
 }
 
@@ -85,14 +105,13 @@ void write_byte(uint8_t data) {
 
 uint8_t read_bit(void) {
     uint8_t bit = 0;
-    GPIOA->ODR &= ~GPIO_ODR_ODR1;
+    PIN_LOW
     delay_1_mcs(DELAY_READ_SLOT);
-    GPIOA->ODR |= GPIO_ODR_ODR1;
-    // ... switch to INPUT
+    PIN_HIGH
     delay_1_mcs(DELAY_BUS_RELAX);
-    bit = (GPIOA->IDR & GPIO_IDR_IDR1 ? 1 : 0);
+    bit = READ_DS18B20_BIT
     delay_1_mcs(DELAY_READ_PAUSE);
-    // ... switch to OUTPUT
+
     return bit;
 }
 

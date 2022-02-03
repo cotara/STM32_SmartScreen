@@ -1,19 +1,21 @@
-"C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\CMSIS\system_stm32f10x.c"
+"C:\STM\STM32_SmartScreen\STMF103\CMSIS\system_stm32f10x.c"
 -std=c11
 -ferror-limit=0
 -fbracket-depth=512
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\CMSIS
+C:\STM\STM32_SmartScreen\STMF103\CMSIS
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\STM32F10x_StdPeriph_Driver\inc
+C:\STM\STM32_SmartScreen\STMF103\STM32F10x_StdPeriph_Driver\inc
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\STM32F10x_StdPeriph_Driver\src
+C:\STM\STM32_SmartScreen\STMF103\STM32F10x_StdPeriph_Driver\src
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\CMSIS
+C:\STM\STM32_SmartScreen\STMF103\CMSIS
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion
+C:\STM\STM32_SmartScreen\STMF103
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\DS18B20
+C:\STM\STM32_SmartScreen\STMF103\DS18B20
+-I
+C:\STM\STM32_SmartScreen\STMF103\EEPROM
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\Core\Include
 -I
@@ -23,15 +25,17 @@ C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\inc\c
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\STM32F10x_StdPeriph_Driver\inc
+C:\STM\STM32_SmartScreen\STMF103\STM32F10x_StdPeriph_Driver\inc
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\STM32F10x_StdPeriph_Driver\src
+C:\STM\STM32_SmartScreen\STMF103\STM32F10x_StdPeriph_Driver\src
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\CMSIS
+C:\STM\STM32_SmartScreen\STMF103\CMSIS
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion
+C:\STM\STM32_SmartScreen\STMF103
 -I
-C:\Users\User\Documents\Projects\STM32F4_smartScreen\Nextion\DS18B20
+C:\STM\STM32_SmartScreen\STMF103\DS18B20
+-I
+C:\STM\STM32_SmartScreen\STMF103\EEPROM
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\Core\Include
 -I
@@ -186,8 +190,8 @@ C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\DSP\Include
 -D__JMP_BUF_ELEMENT_TYPE__=unsigned long long int
 -D__JMP_BUF_NUM_ELEMENTS__=8
 -D__TID__=0xcf60
--D__VER__=8030002
--D__BUILD_NUMBER__=160
+-D__VER__=8030001
+-D__BUILD_NUMBER__=114
 -D__IAR_SYSTEMS_ICC__=9
 -D_MAX_ALIGNMENT=8
 -D__LITTLE_ENDIAN__=1
@@ -264,8 +268,8 @@ C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\DSP\Include
 -D__HAS_JOINED_TYPES__=1
 -D__HAS_LOCATED_DECLARATION__=1
 -D__HAS_LOCATED_WITH_INIT__=1
--D__IAR_COMPILERBASE__=656389
--D__IAR_COMPILERBASE_STR__=10.4.5.1105
+-D__IAR_COMPILERBASE__=656388
+-D__IAR_COMPILERBASE_STR__=10.4.4.1056
 -D__UNICODE_SOURCE_SUPPORTED__=1
 -D__VTABLE_MEM__=
 -D__PRAGMA_REDEFINE_EXTNAME=1
@@ -314,7 +318,7 @@ C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\DSP\Include
 -DUSE_STDPERIPH_DRIVER=1
 -D_DLIB_CONFIG_FILE_HEADER_NAME="C:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 8.1\\arm\\inc\\c\\DLib_Config_Full.h"
 -D_DLIB_CONFIG_FILE_STRING="C:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 8.1\\arm\\inc\\c\\DLib_Config_Full.h"
--D__VERSION__="IAR ANSI C/C++ Compiler V8.30.2.160/W32 for ARM"
+-D__VERSION__="IAR ANSI C/C++ Compiler V8.30.1.114/W32 for ARM"
 -D__ICCARM_OLD_DEFINED_VAARGS__=1
 -D__VA_STACK_ALIGN__=8
 -D__CODE_MEMORY_LIST1__()=__CODE_MEM_HELPER1__(__code, 0 )

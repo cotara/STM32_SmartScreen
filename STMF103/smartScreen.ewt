@@ -2376,6 +2376,12 @@
         </file>
     </group>
     <group>
+        <name>EEPROM</name>
+        <file>
+            <name>$PROJ_DIR$\EEPROM\i2c_ee.c</name>
+        </file>
+    </group>
+    <group>
         <name>STM32Std</name>
         <file>
             <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\misc.c</name>
@@ -2384,10 +2390,10 @@
             <name>$PROJ_DIR$\startup_stm32f10x_md.s</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_dma.c</name>
+            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_gpio.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_gpio.c</name>
+            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_i2c.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_rcc.c</name>
@@ -2407,6 +2413,9 @@
     </group>
     <group>
         <name>User</name>
+        <file>
+            <name>$PROJ_DIR$\LED_user.c</name>
+        </file>
         <file>
             <name>$PROJ_DIR$\myNextion.c</name>
         </file>

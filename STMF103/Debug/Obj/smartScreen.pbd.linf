@@ -1,9 +1,11 @@
 ﻿C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\smartScreen.pbd
+C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\i2c_ee.pbi
+C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\LED_user.pbi
 C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\main.pbi
 C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\misc.pbi
 C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\myNextion.pbi
-C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\stm32f10x_dma.pbi
 C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\stm32f10x_gpio.pbi
+C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\stm32f10x_i2c.pbi
 C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\stm32f10x_it.pbi
 C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\stm32f10x_rcc.pbi
 C:\STM\STM32_SmartScreen\STMF103\Debug\Obj\stm32f10x_rtc.pbi
