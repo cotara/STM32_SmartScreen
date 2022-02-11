@@ -2370,6 +2370,21 @@
         </settings>
     </configuration>
     <group>
+        <name>BME680</name>
+        <file>
+            <name>$PROJ_DIR$\BME68x-Sensor-API-master\bme68x.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\BME68x-Sensor-API-master\bme68x.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\BME68x-Sensor-API-master\bme68x_defs.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\BME68x-Sensor-API-master\userBME680.c</name>
+        </file>
+    </group>
+    <group>
         <name>DS18B20</name>
         <file>
             <name>$PROJ_DIR$\DS18B20\user_ds18b20.c</name>
@@ -2403,6 +2418,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_sdio.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_spi.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_tim.c</name>

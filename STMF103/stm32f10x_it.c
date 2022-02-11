@@ -9,7 +9,7 @@
 extern volatile uint8_t   tx_buffer[TX_BUFFER_SIZE];
 extern volatile unsigned long  tx_wr_index,tx_rd_index,tx_counter;
 uint32_t mcs=0;
-
+uint32_t m_ms=0;
 void HardFault_Handler(void){
   while (1)
   {}
@@ -41,7 +41,6 @@ void TIM2_IRQHandler(void){
 }
  
 void TIM4_IRQHandler(void){
-
     TIM_ClearFlag(TIM4, TIM_IT_Update);
     setRxi(0);                      //1 мс не приходило нового байта. Значит был затык
     resetFLAG_END_LINE();
@@ -56,9 +55,9 @@ void USART1_IRQHandler(void){
             USART_IRQProcessFunc(USART_ReceiveData(USART1) & 0xFF);
         }                                 
         else  USART_ReceiveData(USART1);
+        
     }
            
-    
     if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) { //прерывание по передаче
         USART_ClearITPendingBit(USART1, USART_IT_TC); //очищаем признак прерывания
         if (tx_counter) {                               //если есть что передать

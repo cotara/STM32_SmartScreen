@@ -33,11 +33,9 @@ void I2C_EE_Init(void)
           
             I2C_Init(I2C1, &I2C_InitStruct);          
           // I2C использует две ноги микроконтроллера, их тоже нужно настроить
-          GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+          GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 ;
           GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
           GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
-          GPIO_Init(GPIOB, &GPIO_InitStructure);
- 
           GPIO_Init(GPIOB, &GPIO_InitStructure);
  
           // стартуем модуль I2C
@@ -83,7 +81,7 @@ void I2C_EE_ByteWrite(uint8_t val, uint8_t WriteAddr)
     I2C_GenerateSTOP(I2C1, ENABLE);
 
     //delay between write and read...not less 4ms
-    delay_1_ms(2);
+    delay_1_ms(5);
 }
 //*********************************************************************************
 uint8_t I2C_EE_ByteRead( uint8_t ReadAddr)
