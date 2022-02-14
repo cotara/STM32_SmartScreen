@@ -47,3 +47,10 @@ Backup*
 
 # Trash files
 *.bak
+*.o
+*.pbi
+*.pbd
+*.browse
+*.linf
+*.pbw
+*.dnx
