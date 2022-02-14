@@ -26,8 +26,7 @@ void BusFault_Handler(void){
 }
 
 void SysTick_Handler(void){
-  TimingDelay_1ms_Decrement();
-     
+  TimingDelay_1ms_Decrement(); 
 }
 
 /******************************************************************************/

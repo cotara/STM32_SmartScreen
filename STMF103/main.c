@@ -9,6 +9,8 @@
 #include "i2c_ee.h"
 #include "bme68x.h"
 #include "userBME680.h"
+#include "main.h"
+
 
 int errorSensor =0;
 uint16_t temper;
@@ -16,162 +18,111 @@ uint16_t temper;
 uint8_t isEmpty=1;
 uint16_t temper=0;
 uint16_t tempBuf[512];
+uint16_t hourBuf[HOURBUFSIZE];                                                           //Хранит текущие отсчеты температуры (1р/6 сек)
+uint16_t dayBuf[ANOTHERBUFSIZE];                                                          //Хранит считаныне 5 страниц EEPROM взятые для прореживания, например 1 час
+uint16_t weekBuf[ANOTHERBUFSIZE];
+uint16_t monthBuf[ANOTHERBUFSIZE];
+uint16_t tailHourBuf=0,tailDayBuf=0,tailWeekBuf=0,tailMonthBuf=0;
+uint16_t dayPageCounter =0,weekPageCounter =0,monthPageCounter =0;
 uint32_t average=0;
 
 ErrorStatus HSEStartUpStatus;
 struct bme68x_dev bme;
-struct bme68x_conf conf;
-struct bme68x_heatr_conf heatr_conf;
-struct bme68x_data data;
+struct bme68x_data bmeData;
 float iaq=0;
 
-void RCC_Configuration(void)
-{
-    /*RCC system reset(for debug purpose) */
-    RCC_DeInit();
 
-    RCC_HSICmd(DISABLE);
-    /* Enable HSE */
-    RCC_HSEConfig(RCC_HSE_ON);
 
-    /* Wait till HSE is ready */
-    HSEStartUpStatus = RCC_WaitForHSEStartUp();
+uint16_t getSr(uint16_t mul){
+  uint32_t sum=0;
+  for(int i=0;i<mul;i++)
+    sum+=hourBuf[tailHourBuf-i-1];
 
-    if (HSEStartUpStatus == SUCCESS)
-    {
-        /* HCLK = SYSCLK */
-        RCC_HCLKConfig(RCC_SYSCLK_Div1);
-
-        /* PCLK2 = HCLK*/
-        RCC_PCLK2Config(RCC_HCLK_Div1);
-
-        /* PCLK1 = HCLK*/
-        RCC_PCLK1Config(RCC_HCLK_Div1);
-
-        //ADC CLK
-        RCC_ADCCLKConfig(RCC_PCLK2_Div2);
-
-        RCC->CFGR|= 0x01<<17;
-          
-        /* PLLCLK = 8MHz * 3 = 24 MHz */
-        RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9);
-
-        /* Enable PLL */
-        RCC_PLLCmd(ENABLE);
-
-        /* Wait till PLL is ready */
-        while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET) {}
-
-        /* Select PLL as system clock source */
-        RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-
-        /* Wait till PLL is used as system clock source */
-        while (RCC_GetSYSCLKSource() != 0x08) {}
-    }
+  return sum/mul;
 }
-void bme680Init(){
-  int8_t rslt;
-  
-  rslt = bme68x_interface_init(&bme);
-    bme68x_check_rslt("bme68x_interface_init", rslt);
-
-    rslt = bme68x_init(&bme);
-    bme68x_check_rslt("bme68x_init", rslt);
-
-    /* Check if rslt == BME68X_OK, report or handle if otherwise */
-    conf.filter = BME68X_FILTER_SIZE_3;
-    conf.odr = BME68X_ODR_20_MS;
-    conf.os_hum = BME68X_OS_16X;
-    conf.os_pres = BME68X_OS_1X;
-    conf.os_temp = BME68X_OS_16X;
-    rslt = bme68x_set_conf(&conf, &bme);
-    bme68x_check_rslt("bme68x_set_conf", rslt);
-
-    
-    /* Check if rslt == BME68X_OK, report or handle if otherwise */
-    heatr_conf.enable = BME68X_ENABLE;
-    heatr_conf.heatr_temp = 300;
-    heatr_conf.heatr_dur = 150;
-    rslt = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf, &bme);
-    bme68x_check_rslt("bme68x_set_heatr_conf", rslt);
-
-}
-void getTHPG(){
-    
-    int8_t rslt;
-    float gasTemp=0;
-    uint32_t del_period;
-    uint8_t n_fields;
-    uint16_t sample_count = 0;
-
-    while (sample_count < 1)
-    {
-        rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, &bme);
-        bme68x_check_rslt("bme68x_set_op_mode", rslt);
-
-        /* Calculate delay period in microseconds */
-        del_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme) + (heatr_conf.heatr_dur * 1000);
-        bme.delay_us(del_period, bme.intf_ptr);
-
-        /* Check if rslt == BME68X_OK, report or handle if otherwise */
-        rslt = bme68x_get_data(BME68X_FORCED_MODE, &data, &n_fields, &bme);
-        bme68x_check_rslt("bme68x_get_data", rslt);
-
-        if (n_fields)
-        {
-            sample_count++;
-            gasTemp+=data.gas_resistance;
-        }
-    }
-    data.gas_resistance = gasTemp/1;
-}
-
 int main()
 {
   uint8_t status;
-  
+  uint16_t testNum=0;
   SystemInit();
-  
-  
-  //RCC_ClocksTypeDef RCC_Clocks;
-  //RCC_GetClocksFreq(&RCC_Clocks);
-  //RCC_Configuration();
   SysTick_Config(SystemCoreClock/1000);//1ms
   tim4_init();
   tim2_init();
-  
   LEDInit();   
   GPIO_init();     
   usart_init();
-  //I2C_EE_Init();
-  
-  bme680Init();
-  while(1){
-    getTHPG();
-    iaq=iaqCalc(data.gas_resistance,data.humidity);
-    delay_1_ms(50);
-  }
-  
-  status=ds18b20_init(DS18B20_Resolution_12_bit);
+  I2C_EE_Init();
+  bme680Init(&bme);
+    
+
+  status=ds18b20_init(DS18B20_Resolution_9_bit);
     if (status){
       while(1);
-    }
-   
-    
+  } 
+
   while(1){
-    if(getFLAG_END_LINE() == 3)
+    if(getFLAG_END_LINE() == 3)                                                 //пришла посылка от экранчика
       nextionEvent();
     
-    temper = ds18b20_get_temperature();
-    setToEE(temper);
+    //getTHPG(&bme,&bmeData);                                                                  //Читаем bme680
+    //iaq=iaqCalc(bmeData.gas_resistance,bmeData.humidity);                             
     
+    //temper = ds18b20_get_temperature();                                       //Читаем ds18b20
+    temper=testNum++;
+    
+    hourBuf[tailHourBuf++]=temper;                                              //Положили температурку
+    
+    if(tailHourBuf%24==0){                                                      //Прошло 24 измерения (144 секунды) и можно записать в буфер дня
+      dayBuf[tailDayBuf++] = getSr(24);                                         //Записываем среднее от 24 последних измерений
+      if(tailDayBuf==ANOTHERBUFSIZE){                                            //Буфер заполнился (144 минуты), пора записывать
+        if(getFromEE(DAYSTARTPAGE,60,&dayPageCounter)!=0) while(1);             //Читаем текущую страницу для записи данных по дню
+        if(writePageEE(dayBuf,DAYSTARTPAGE+dayPageCounter)) while(1);           //пишем часть (1/10) по дню
+        dayPageCounter++;                                                       //Инкрементируем счетчик текущей страницы
+        if(DAYSTARTPAGE+dayPageCounter>DAYENDTPAGE)  dayPageCounter=0;          //Если записали последнюю (10-ю) часть, начинаем с первой страницы
+        if(setToEE(DAYSTARTPAGE,60,dayPageCounter)) while(1);                   //Записываем номер страницы для записи следующей пачки
+        tailDayBuf=0;
+      }
+    }
+    
+    if(tailHourBuf%168==0){                                                     //Прошло 168 измерений (1008 секунд) и можно записать в буфер недели
+      weekBuf[tailWeekBuf++] = getSr(168);                                      //Записываем среднее от 168 последних измерений
+      if(tailWeekBuf==ANOTHERBUFSIZE){                                           //Буфер заполнился (1008 минут - 16,8 часов), пора записывать
+        if(getFromEE(WEEKSTARTPAGE,60,&weekPageCounter)!=0) while(1);           //Читаем текущую страницу для записи данных по неделе
+        if(writePageEE(weekBuf,WEEKSTARTPAGE+weekPageCounter)) while(1);        //пишем часть (1/10) по неделе
+        weekPageCounter++;
+        if(WEEKSTARTPAGE+weekPageCounter>WEEKENDTPAGE)  weekPageCounter=0;//Если записали последнюю (10-ю) часть, начинаем с первой страницы
+        if(setToEE(WEEKSTARTPAGE,60,weekPageCounter)) while(1);                 //Записываем номер страницы для записи следующей пачки
+        tailWeekBuf=0;
+      }
+    }
+    
+    if(tailHourBuf==HOURBUFSIZE){                                                //Буфер заполнился, пора записывать
+      monthBuf[tailMonthBuf++] = getSr(600);                                    //За 600 измерений прошел час. Записываем точку в буфер месяца. 600 таких точек дадут нам 25 дней.
+      for(int i=0;i<10;i++){
+        if(writePageEE(&hourBuf[0]+i*60,i)) while(1);                          //Пишем все 6 частей
+      }
+      tailHourBuf=0;
+        
+      if(tailMonthBuf==ANOTHERBUFSIZE){                                          //Буфер заполнился (60 часов), пора записывать
+        if(getFromEE(MONTHSTARTPAGE,60,&monthPageCounter)!=0) while(1);         //Читаем текущую страницу для записи данных по месяцу
+        if(writePageEE(monthBuf,MONTHSTARTPAGE+monthPageCounter)) while(1);     //пишем часть (1/10) по месяцу
+        monthPageCounter++;
+        if(MONTHSTARTPAGE+monthPageCounter>MONTHENDTPAGE)  monthPageCounter=0;     //Если записали последнюю (10-ю) часть, начинаем с первой страницы
+        if(setToEE(MONTHSTARTPAGE,60,monthPageCounter)) while(1);               //Записываем номер страницы для записи следующей пачки
+        tailMonthBuf=0;
+      }                                                                         //всего на 10 страниц влезет 600 часов - 25 дней.
+    }    
+    
+    
+    
+    /*
     if (getNowPage()==0){
-     Nextion_SetValue_Number("x0.val=",temper);
-       if(temper>=-300)
-         Nextion_SetValue_Number("temperature.val=",temper*3/10+90);
-       else
-         Nextion_SetValue_Number("temperature.val=",temper*3/10+450);
-     }
+       Nextion_SetValue_Number("x0.val=",(uint32_t)bmeData.temperature*10);
+       Nextion_SetValue_Number("x1.val=",temper); 
+       Nextion_SetValue_Number("n0.val=",(uint32_t)bmeData.humidity);
+       Nextion_SetValue_Number("n1.val=",(uint32_t)(bmeData.pressure*0.00750062));
+       Nextion_SetValue_Number("n2.val=",(uint32_t)iaq);
+    }
        
      else if(getNowPage()== 1){
        Nextion_SetValue_Number("add 2,0,",temper/2);
@@ -179,15 +130,20 @@ int main()
      }
      else if(getNowPage()== 2 && getReqBigBuf()){
        resetReqBigBuf();
-       getFromEE(tempBuf,512);
+       //getFromEE(tempBuf,512);
        for(int i=0;i<512;i++){
-        Nextion_SetValue_Number("add 1,0,",tempBuf[i]*0.667);
+        Nextion_SetValue_Number("add 1,0,",(uint32_t)(tempBuf[i]*0.667));
         average+=tempBuf[i];
        }
         Nextion_SetValue_Number("n0.val=",average/5120);
      }
-       //delay_1_ms(500);
-    }   
+     
+    */
+    //delay_1_ms(2);                                                           //Делаем измерения раз в 6 секунд
+    
+  
+  
+  }   
 
   
   

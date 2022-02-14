@@ -1,5 +1,5 @@
 #include "bme68x.h"
-
+#include "bme68x_defs.h"
 /*!
  *  @brief Function to select the interface between SPI and I2C.
  *
@@ -102,6 +102,9 @@ void  spiWriteMulti(uint8_t addr, uint8_t *buf, uint8_t len);
 void spiReadMulti(uint8_t addr, uint8_t* buf, uint8_t len);
 
 float iaqCalc(float resistance, float hum);
+void getTHPG(struct bme68x_dev* bme,struct bme68x_data* bmeData);
+void bme680Init(struct bme68x_dev* bme);
+
 #ifdef __cplusplus
 }
 #endif /*__cplusplus */

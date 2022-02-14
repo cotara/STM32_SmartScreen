@@ -15,22 +15,19 @@
 #define BME68X_SHUTTLE_ID  0x93
 #define CS_LOW GPIO_ResetBits(GPIOA, GPIO_Pin_3);
 #define CS_HIGH GPIO_SetBits(GPIOA, GPIO_Pin_3);
-/******************************************************************************/
-/*!                Static variable definition                                 */
-static uint8_t dev_addr;
+
 
 /******************************************************************************/
 /*!                User interface functions                                   */
 
-
+struct bme68x_conf conf;
+struct bme68x_heatr_conf heatr_conf;
 
 /*!
  * SPI read function map to COINES platform
  */
 BME68X_INTF_RET_TYPE bme68x_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
 {
-    uint8_t dev_addr = *(uint8_t*)intf_ptr;
-
     spiReadMulti(reg_addr, reg_data, len);
     return 0;
 }
@@ -40,43 +37,12 @@ BME68X_INTF_RET_TYPE bme68x_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32
  */
 BME68X_INTF_RET_TYPE bme68x_spi_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr)
 {
-    uint8_t dev_addr = *(uint8_t*)intf_ptr;
     spiWriteMulti(reg_addr,(uint8_t*)reg_data,len);
     return 0;
 }
 
-/*
-BME68X_INTF_RET_TYPE bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
-{    
-    uint8_t dev_addr = *(uint8_t*)intf_ptr;
-    uint8_t *data = reg_data;
-    uint8_t start_reg_addr=reg_addr;
-    uint32_t m_len = len;
-    
-    while(m_len--)
-     *(uint8_t *)data++ =  I2C_ByteRead(start_reg_addr++,dev_addr);
-    
-    return 0;
-}
 
-BME68X_INTF_RET_TYPE bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr)
-{
-    uint8_t dev_addr = *(uint8_t*)intf_ptr;
-    uint8_t start_reg_addr=reg_addr;
-    uint32_t m_len = len;
-    uint8_t byte;
-    
-    while(m_len--){
-      byte = *(reg_data + (len-m_len));
-      I2C_ByteWrite(byte,start_reg_addr++,dev_addr);
-    }
-    
-    return 0;
-}
-*/
-/*!
- * Delay function map to COINES platform
- */
+
 void bme68x_delay_us(uint32_t period, void *intf_ptr)
 {
     delay_1_mcs(period);
@@ -148,19 +114,75 @@ int8_t bme68x_interface_init(struct bme68x_dev *bme)
               
     int8_t rslt = BME68X_OK;
 
-    dev_addr = BME68X_I2C_ADDR_HIGH;
     bme->read = bme68x_spi_read;
     bme->write = bme68x_spi_write;
     bme->intf = BME68X_SPI_INTF;
 
     bme->delay_us = bme68x_delay_us;
-    bme->intf_ptr = &dev_addr;
     bme->amb_temp = 25; /* The ambient temperature in deg C is used for defining the heater temperature */
 
     return rslt;
-    
-    spiTransferByte(0x56);
 }
+
+
+void bme680Init(struct bme68x_dev* bme){
+  int8_t rslt;
+  
+    rslt = bme68x_interface_init(bme);
+    bme68x_check_rslt("bme68x_interface_init", rslt);
+
+    rslt = bme68x_init(bme);
+    bme68x_check_rslt("bme68x_init", rslt);
+
+    /* Check if rslt == BME68X_OK, report or handle if otherwise */
+    conf.filter = BME68X_FILTER_SIZE_3;
+    conf.odr = BME68X_ODR_20_MS;
+    conf.os_hum = BME68X_OS_16X;
+    conf.os_pres = BME68X_OS_16X;
+    conf.os_temp = BME68X_OS_16X;
+    rslt = bme68x_set_conf(&conf, bme);
+    bme68x_check_rslt("bme68x_set_conf", rslt);
+
+    
+    /* Check if rslt == BME68X_OK, report or handle if otherwise */
+    heatr_conf.enable = BME68X_ENABLE;
+    heatr_conf.heatr_temp = 300;
+    heatr_conf.heatr_dur = 150;
+    rslt = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf, bme);
+    bme68x_check_rslt("bme68x_set_heatr_conf", rslt);
+
+}
+void getTHPG(struct bme68x_dev* bme,struct bme68x_data* bmeData){
+    
+    int8_t rslt;
+    float gasTemp=0;
+    uint32_t del_period;
+    uint8_t n_fields;
+    uint16_t sample_count = 0;
+
+    while (sample_count < 1)
+    {
+        rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, bme);
+        bme68x_check_rslt("bme68x_set_op_mode", rslt);
+
+        /* Calculate delay period in microseconds */
+        del_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, bme) + (heatr_conf.heatr_dur * 1000);
+        bme->delay_us(del_period, bme->intf_ptr);
+
+        /* Check if rslt == BME68X_OK, report or handle if otherwise */
+        rslt = bme68x_get_data(BME68X_FORCED_MODE, bmeData, &n_fields, bme);
+        bme68x_check_rslt("bme68x_get_data", rslt);
+
+        if (n_fields)
+        {
+            sample_count++;
+            gasTemp+=bmeData->gas_resistance;
+        }
+    }
+    bmeData->gas_resistance = gasTemp/1;
+    bmeData->temperature-=1.0;
+}
+
 
 // Transfer a byte over SPI2 B12/SS, B13/SCK, B14/MISO, B15/MOSI
 uint8_t spiTransferByte(uint8_t outByte){
@@ -240,7 +262,7 @@ float iaqCalc(float resistance, float hum){
   
   //Calculate gas contribution to IAQ index
   float gas_lower_limit = 10000;   // Bad air quality limit
-  float gas_upper_limit = 300000;  // Good air quality limit 
+  float gas_upper_limit = 100000;  // Good air quality limit 
   if (resistance > gas_upper_limit) resistance = gas_upper_limit; 
   if (resistance < gas_lower_limit) resistance = gas_lower_limit;
   

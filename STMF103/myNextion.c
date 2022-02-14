@@ -33,17 +33,32 @@ void nextionEvent(void){
       
       RX_FLAG_END_LINE=0;
       
-      if(fromBuf(0) == 0x00 && fromBuf(1) == 0x08){                             //СТАРТ Массаж 1
-        if (fromBuf(3) == 1){
-          LEDOn();
+      if(fromBuf(0) == 0x00){
+        if(fromBuf(1) == 0x00){
+          nowPage = fromBuf(0);
         }
-        else
-          LEDOff();
+        else if(fromBuf(1) == 0x01){
+          GPIOB->ODR ^= GPIO_Pin_0;
+        }
+        else if(fromBuf(1) == 0x02){
+          GPIOB->ODR ^= GPIO_Pin_5;
+        }
+        else if(fromBuf(1) == 0x03){
+          GPIOB->ODR ^= GPIO_Pin_8;
+        }
+        else if(fromBuf(1) == 0x04){
+          GPIOB->ODR ^= GPIO_Pin_9;
+        }
       }
-      else if(fromBuf(1) == 0x00){
-        nowPage = fromBuf(0);
-        if (nowPage == 2) reqBigBuf=1;
+      
+      else if(fromBuf(0) == 0x01){
+        if(fromBuf(1) == 0x00){
+          nowPage = fromBuf(0);
+        } 
+        
       }
+      
+      if (nowPage == 2) reqBigBuf=1;
      clear_RXBuffer();
 }
 

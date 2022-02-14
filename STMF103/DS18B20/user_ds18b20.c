@@ -3,9 +3,9 @@
 #include "stm32f10x_gpio.h"
 #include "user_TIMER.h"
 
-#define PIN_LOW GPIO_ResetBits(GPIOA, GPIO_Pin_7);
-#define PIN_HIGH GPIO_SetBits(GPIOA, GPIO_Pin_7);
-#define READ_DS18B20_BIT GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_7);
+#define PIN_LOW GPIO_ResetBits(GPIOA, GPIO_Pin_0);
+#define PIN_HIGH GPIO_SetBits(GPIOA, GPIO_Pin_0);
+#define READ_DS18B20_BIT GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
 
 static uint32_t convert_delay = DELAY_T_CONVERT;
 
@@ -23,7 +23,7 @@ uint8_t ds18b20_init(const DS18B20_RESOLUTION_t resolution) {
     
    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
    
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
