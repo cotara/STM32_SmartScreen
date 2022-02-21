@@ -4,7 +4,7 @@
 #include "user_USART.h"
 #include "LED_user.h"
 #include "myNextion.h"
-#define TX_BUFFER_SIZE 100
+
 
 extern volatile uint8_t   tx_buffer[TX_BUFFER_SIZE];
 extern volatile unsigned long  tx_wr_index,tx_rd_index,tx_counter;

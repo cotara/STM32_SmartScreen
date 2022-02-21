@@ -4,8 +4,7 @@
 #include "stm32f10x_usart.h"
 #include "misc.h"
 
-#define RX_BUF_SIZE 80
-#define TX_BUFFER_SIZE 100
+
 
 uint8_t RXi;
 uint8_t RX_BUF[RX_BUF_SIZE] = {'\0'};
