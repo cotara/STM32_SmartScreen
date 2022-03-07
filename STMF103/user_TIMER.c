@@ -27,7 +27,7 @@ void tim4_init(void){
     TIM_TimeBaseStructInit(&TIMER_InitStructure);
     TIMER_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIMER_InitStructure.TIM_Prescaler = 72-1;                                   //1 мс
-    TIMER_InitStructure.TIM_Period = 1000;                                         
+    TIMER_InitStructure.TIM_Period = 1000-1;                                         
     TIM_TimeBaseInit(TIM4, &TIMER_InitStructure);
     TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
     

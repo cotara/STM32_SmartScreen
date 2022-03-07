@@ -30,7 +30,7 @@ ErrorStatus HSEStartUpStatus;
 struct bme68x_dev bme;
 struct bme68x_data bmeData;
 float iaq=0;
-
+extern uint8_t itsTimeFlag;
 
 
 uint16_t getSr(uint16_t mul, uint16_t *buf){
@@ -61,17 +61,20 @@ int main()
 
   while(1){
       
-    
-    getTHPG(&bme,&bmeData);                                                     //Читаем bme680
-    iaq=iaqCalc(bmeData.gas_resistance,bmeData.humidity);                             
-    temper = ds18b20_get_temperature();                                       //Читаем ds18b20
-   
-    updateEEPROM();
+    if(itsTimeFlag){
+      getTHPG(&bme,&bmeData);                                                     //Читаем bme680
+      iaq=iaqCalc(bmeData.gas_resistance,bmeData.humidity);                             
+      temper = ds18b20_get_temperature();                                       //Читаем ds18b20
+     
+      updateEEPROM();
 
-    if (getNowPage()==0){
-       sensorsDataSend();
+      if (getNowPage()==0){
+         sensorsDataSend();
+      }
+      //delay_1_ms(5000);                                                           //Делаем измерения раз в 6 секунд 
+      LEDToggle();
+      itsTimeFlag=0;
     }
-    //delay_1_ms(5000);                                                           //Делаем измерения раз в 6 секунд 
   }    
 }
 

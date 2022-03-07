@@ -10,6 +10,7 @@ extern volatile uint8_t   tx_buffer[TX_BUFFER_SIZE];
 extern volatile unsigned long  tx_wr_index,tx_rd_index,tx_counter;
 uint32_t mcs=0;
 uint32_t m_ms=0;
+uint8_t itsTimeFlag=0;
 void HardFault_Handler(void){
   while (1)
   {}
@@ -26,7 +27,12 @@ void BusFault_Handler(void){
 }
 
 void SysTick_Handler(void){
-  TimingDelay_1ms_Decrement(); 
+  TimingDelay_1ms_Decrement();
+  m_ms++;
+  if(m_ms>=6000){
+    m_ms=0;
+    itsTimeFlag=1;
+  }
 }
 
 /******************************************************************************/
