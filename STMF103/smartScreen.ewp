@@ -2098,6 +2098,12 @@
             <name>$PROJ_DIR$\startup_stm32f10x_md.s</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\!STM32F10x_StdPeriph_Lib_V3.5.0_8MGz\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_adc.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\!STM32F10x_StdPeriph_Lib_V3.5.0_8MGz\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_dma.c</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\STM32F10x_StdPeriph_Driver\src\stm32f10x_gpio.c</name>
         </file>
         <file>
@@ -2129,6 +2135,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\myNextion.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\user_ADC.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\user_GPIO.c</name>

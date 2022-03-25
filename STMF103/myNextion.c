@@ -12,7 +12,8 @@
 uint8_t RX_FLAG_END_LINE = 0;
 uint8_t status[21]="t3.txt=";
 uint8_t command[11]="sendme";
-uint32_t st=0;
+//uint32_t st=0;
+uint8_t autoBright = 1;
 uint8_t endMes[3]={0xFF,0xFF,0xFF};
 static uint8_t StrBuff[64]; 
 uint8_t nowPage=0;
@@ -48,6 +49,7 @@ void nextionEvent(void){
       }
       
       nowPage = fromBuf(0);
+
       if(nowPage == 0x01 || nowPage == 0x02 || nowPage == 0x03 || nowPage == 0x04){                            
         if(fromBuf(1) != 0x00){
           readGrapgData((fromBuf(0)-1)*4 + (fromBuf(1)-1),graphDataBuf);        //Читаем данные с EEPROM (600 точек) с параметром номера страницы минус 1.
@@ -55,6 +57,9 @@ void nextionEvent(void){
           for(int i=0;i<600;i++)
             Nextion_SetValue_Number("add 2,0,",(uint32_t)graphDataBuf[i]); 
         }
+      }
+      else if(nowPage == 0x05){                                                  //Экран настроек)
+        autoBright = fromBuf(3);
       }
       else{
         if(fromBuf(1) == 0x00){
@@ -93,6 +98,9 @@ void Nextion_SetValue_String(char *ValueName, char *Value)
   USART1_put_string((uint8_t *)endMes, 3);
 }
 
+uint8_t getAutoBr(){
+  return autoBright;
+}
 void incFLAG_END_LINE(void){
   RX_FLAG_END_LINE++;
 }

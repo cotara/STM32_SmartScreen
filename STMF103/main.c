@@ -3,6 +3,7 @@
 #include "user_USART.h"
 #include "user_GPIO.h"
 #include "user_TIMER.h"
+#include "user_ADC.h"
 #include "myNextion.h"
 #include "user_ds18b20.h"
 #include "LED_user.h"
@@ -24,7 +25,7 @@ uint16_t weekT1Buf[ANOTHERBUFSIZE], weekT2Buf[ANOTHERBUFSIZE], weekHBuf[ANOTHERB
 uint16_t monthT1Buf[ANOTHERBUFSIZE], monthT2Buf[ANOTHERBUFSIZE], monthHBuf[ANOTHERBUFSIZE], monthPBuf[ANOTHERBUFSIZE];
 uint16_t tailHourBuf=0,tailDayBuf=0,tailWeekBuf=0,tailMonthBuf=0;
 uint16_t dayPageCounter =0,weekPageCounter =0,monthPageCounter =0;
-
+uint16_t ADC1ConvertedValue = 0;
 
 ErrorStatus HSEStartUpStatus;
 struct bme68x_dev bme;
@@ -52,13 +53,14 @@ int main()
   usart_init();
   I2C_EE_Init();
   bme680Init(&bme);
-    
+  
 
   status=ds18b20_init(DS18B20_Resolution_12_bit);
     if (status){
       while(1);
   } 
 
+  initADC();
   while(1){
       
     if(itsTimeFlag){
@@ -71,6 +73,8 @@ int main()
       if (getNowPage()==0){
          sensorsDataSend();
       }
+              
+      Nextion_SetValue_Number("x0.val=",(uint32_t)(bmeData.temperature*10));
       //delay_1_ms(5000);                                                           //Делаем измерения раз в 6 секунд 
       LEDToggle();
       itsTimeFlag=0;

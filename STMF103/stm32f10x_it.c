@@ -5,12 +5,15 @@
 #include "LED_user.h"
 #include "myNextion.h"
 
-
+extern uint16_t adcBuf[200];
+extern uint16_t ADC1ConvertedValue;
 extern volatile uint8_t   tx_buffer[TX_BUFFER_SIZE];
 extern volatile unsigned long  tx_wr_index,tx_rd_index,tx_counter;
 uint32_t mcs=0;
 uint32_t m_ms=0;
 uint8_t itsTimeFlag=0;
+uint32_t sum=0;
+
 void HardFault_Handler(void){
   while (1)
   {}
@@ -33,6 +36,14 @@ void SysTick_Handler(void){
     m_ms=0;
     itsTimeFlag=1;
   }
+  if(m_ms%500 ==0){
+    for(int i=0;i<200;i++)
+      sum+=adcBuf[i];
+    ADC1ConvertedValue=sum/200;
+    sum=0;
+    if(getAutoBr() == 1)
+      Nextion_SetValue_Number("dim=",(uint32_t)(ADC1ConvertedValue*0.024)+1);
+  }
 }
 
 /******************************************************************************/
@@ -41,7 +52,7 @@ void SysTick_Handler(void){
 void TIM2_IRQHandler(void){
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
     TimingDelay_1mcs_Decrement();
-    //mcs++;
+   mcs++;
     //LEDToggle();
 }
  
