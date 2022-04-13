@@ -1,6 +1,17 @@
 #ifndef __DS18B20_H__
 #define __DS18B20_H__
 
+/*
+#define DELAY_RESET           500
+#define DELAY_WRITE_0         15
+#define DELAY_WRITE_0_PAUSE   15
+#define DELAY_WRITE_1         15
+#define DELAY_WRITE_1_PAUSE   15
+#define DELAY_READ_SLOT       15
+#define DELAY_BUS_RELAX       15
+#define DELAY_READ_PAUSE      35
+#define DELAY_T_CONVERT       800000
+#define DELAY_RELAXATION      5
 
 #define DELAY_RESET           500
 #define DELAY_WRITE_0         65
@@ -12,9 +23,17 @@
 #define DELAY_READ_PAUSE      45
 #define DELAY_T_CONVERT       800000
 #define DELAY_RELAXATION      5
-
-#define DELAY_RELAXATION      5
-
+*/
+#define DELAY_RESET           100
+#define DELAY_WRITE_0         13
+#define DELAY_WRITE_0_PAUSE   1
+#define DELAY_WRITE_1         1
+#define DELAY_WRITE_1_PAUSE   13
+#define DELAY_READ_SLOT       1
+#define DELAY_BUS_RELAX       3
+#define DELAY_READ_PAUSE      9
+#define DELAY_T_CONVERT       160000
+#define DELAY_RELAXATION      1
 
 //Преобразование для 12 бит = 750 мс
 

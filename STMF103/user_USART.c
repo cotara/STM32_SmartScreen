@@ -55,7 +55,7 @@ void usart_init(void)
         
         /* Enable the USARTx Interrupt */
 	
-        NVIC_SetPriority (USART1_IRQn, 0);
+        NVIC_SetPriority (USART1_IRQn, 1);
         NVIC_EnableIRQ (USART1_IRQn);
 }
 void clear_RXBuffer(void) {
@@ -83,7 +83,9 @@ uint8_t toBuf(uint8_t n){
 uint8_t fromBuf( uint16_t i){
     return RX_BUF[i];
 }
-
+uint8_t* rxBuf(){
+    return RX_BUF;
+}
 void USART1_put_char(uint8_t c) {
   while (tx_counter == TX_BUFFER_SIZE);                                         //если буфер переполнен, ждем
   USART_ITConfig(USART1, USART_IT_TC, DISABLE);                                 //запрещаем прерывание, чтобы оно не мешало менять переменную
@@ -103,4 +105,20 @@ void USART1_put_string(unsigned char *string, uint32_t l) {
     USART1_put_char(*string++);
     l--;
   }
+}
+
+uint8_t getByteFromUARTbuf(){
+  uint8_t val;
+  val = tx_buffer[tx_rd_index];
+  tx_rd_index++;
+  if(tx_rd_index == TX_BUFFER_SIZE)
+    tx_rd_index=0;
+  
+  return val;
+}
+unsigned long getTXcounter(){
+    return tx_counter;
+}
+void setTXcounter(unsigned long val){
+    tx_counter=val;
 }

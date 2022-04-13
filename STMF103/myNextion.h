@@ -12,3 +12,7 @@ void readGrapgData(int16_t par, uint16_t *buf);
 void transparent(uint16_t *buf);
 void errorProcess(uint8_t code);
 uint8_t getAutoBr();
+
+
+void addCommand();
+uint8_t getCountCommand();

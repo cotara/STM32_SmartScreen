@@ -79,7 +79,7 @@ void I2C_EE_ByteWrite(uint8_t val, uint16_t WriteAddr)
     I2C_GenerateSTOP(I2C1, ENABLE);
 
     //delay between write and read...not less 4ms
-    delay_1_ms(5);
+    delay_1_ms(10);
 }
 //*********************************************************************************
 uint8_t I2C_EE_ByteRead( uint16_t ReadAddr)
@@ -150,8 +150,8 @@ uint8_t setToEE(uint16_t page, uint16_t place, uint16_t val){
   lsb=(uint8_t)(val & 0x00FF);
   msb=(uint8_t)((val & 0xFF00)>> 8);
 
-  I2C_EE_ByteWrite(msb,memAdd++);delay_1_ms(5);
-  I2C_EE_ByteWrite(lsb,memAdd++);delay_1_ms(5);
+  I2C_EE_ByteWrite(msb,memAdd++);
+  I2C_EE_ByteWrite(lsb,memAdd++);
 
   
   temp1=I2C_EE_ByteRead(memAdd-2);
@@ -214,7 +214,7 @@ uint8_t writePageEE(uint16_t *val, uint16_t page){
     if(temp_buf[i] != *val++)
       return 1;
   }
-    
+  
   return 0;
 }
 
@@ -258,7 +258,8 @@ uint8_t readPageEE(uint16_t *val1, uint16_t page){
   
   // Send STOP condition
   I2C_GenerateSTOP(I2C1, ENABLE);
-
+  delay_1_ms(10);
+  
   return 0;
 }
 

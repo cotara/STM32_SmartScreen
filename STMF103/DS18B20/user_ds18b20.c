@@ -117,7 +117,9 @@ uint8_t read_bit(void) {
 
 uint16_t read_temperature(void) {
     uint16_t data = 0;
-    for (uint8_t i = 0; i < 16; i++)
+    for (uint8_t i = 0; i < 16; i++){
         data += (uint16_t) read_bit() << i;
+        delay_1_mcs(DELAY_RELAXATION);
+    }
     return (uint16_t)(((float) data / 16.0f) * 10.0f);
 }

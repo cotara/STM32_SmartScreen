@@ -10,7 +10,7 @@ void tim2_init(void){
     TIM_TimeBaseStructInit(&TIMER_InitStructure);
     TIMER_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIMER_InitStructure.TIM_Prescaler = 36-1;                                   //1 мкс
-    TIMER_InitStructure.TIM_Period = 2;                                         
+    TIMER_InitStructure.TIM_Period = 10-1;                                         
     TIM_TimeBaseInit(TIM2, &TIMER_InitStructure);
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
     TIM_Cmd(TIM2, ENABLE);
